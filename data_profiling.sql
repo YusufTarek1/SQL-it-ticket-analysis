@@ -14,6 +14,7 @@ FROM tickets
 GROUP BY issue_type
 ORDER BY issue_count DESC;
 
+
 -- count the issues for each specialist
 SELECT assigned_to, COUNT(*) AS issue_count
 FROM tickets
@@ -107,3 +108,34 @@ SELECT
 FROM tickets
 GROUP BY issue_type
 ORDER BY avg_resolution_days;
+
+
+-- group by multiple columns
+SELECT
+    priority,
+    issue_type,
+    COUNT(*) AS ticket_count,
+    MIN(created_at) AS first_ticket,
+    MAX(created_at) AS latest_ticket
+FROM tickets
+GROUP BY priority, issue_type
+ORDER BY priority, ticket_count DESC;
+
+
+-- percentage of resolved tickets (completion rate)
+SELECT 
+    COUNT(*) AS total_tickets,
+    SUM(CASE WHEN resolved_at IS NOT NULL THEN 1 ELSE 0 END) AS resolved_tickets,
+    ROUND(
+        100.0 * SUM(CASE WHEN resolved_at IS NOT NULL THEN 1 ELSE 0 END) / COUNT(*), 
+        2
+    ) AS resolution_completion_rate_percent
+FROM tickets;
+
+
+-- date range of tickets
+SELECT 
+    MIN(created_at) AS oldest_ticket_date,
+    MAX(created_at) AS newest_ticket_date,
+    DATEDIFF(DAY, MIN(created_at), MAX(created_at)) AS date_range_days
+FROM tickets;
